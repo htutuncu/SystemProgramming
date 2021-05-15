@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "jval.h"
+#include "jrb.h"
+#include "fields.h"
 #define MAX_SIZE 1000
 
 char *removeLeadingSpaces(char *str);
@@ -9,6 +12,7 @@ void removeChar(char *s, char c);
 
 int main()
 {
+    JRB jrb = make_jrb();
 
     const char *filename = ".kilit";
     FILE *fp = fopen(filename, "rb");
@@ -29,6 +33,7 @@ int main()
     }
 
     int j;
+    
     for (j = 1; j < i - 1; j++)
     {
         file[j] = removeLeadingSpaces(file[j]);
@@ -50,13 +55,24 @@ int main()
 
         value = removeLeadingSpaces(value);
 
-        printf("%s\n", key);
-        printf("%s\n",value);
+        /*printf("%s\n", key);
+        printf("%s\n",value);*/
 
-        free(key);
-        free(value);
-        free(token);
+        Jval myJval = (Jval)malloc(sizeof(Jval));
+        myJval = new_jval_s(strdup(value));
+
+        
+        (void) jrb_insert_str(jrb, strdup(key), myJval);
+
+        
     }
+    /*free(key);
+        free(value);
+        free(token);*/
+    JRB bn;
+    jrb_traverse(bn, jrb) {
+    printf("%s", jval_s(bn->val));
+  }
 
 
     fclose(fp);
