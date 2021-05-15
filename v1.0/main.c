@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libfdr/jval.h"
-#include "libfdr/jrb.h"
-#include "libfdr/dllist.h"
-#include "libfdr/fields.h"
+#include "jval.h"
+#include "jrb.h"
+#include "dllist.h"
+#include "fields.h"
 
 #define MAX_SIZE 1000
 
@@ -27,10 +27,14 @@ int main(int argc, char** argv)
 
     const char *filename = ".kilit";
     FILE *fp = fopen(filename, "rb");
-    /*  FILE * input = fopen(argv[2], "r");  */
+    //FILE * input = fopen(argv[2], "r"); 
 
     IS is;      /* Fields struct for reading input */
     is = new_inputstruct(argv[2]);
+    if (is == NULL) {
+        perror(argv[2]);
+        exit(1);
+    }
 
     FILE * output = fopen(argv[3], "w+");
 
@@ -46,9 +50,8 @@ int main(int argc, char** argv)
 
     i = 0;
     while (fgets(buffer, bufferLength, fp))
-    {
         strcpy(file[i++], buffer);
-    }
+    
 
     int j;
     
@@ -63,24 +66,33 @@ int main(int argc, char** argv)
            delimiters present in str[]. */
 
         char *key = strdup(token);
+        int k;
+        char *newKey = (char*)malloc(strlen(key)*sizeof(char));
+        for(k=0; k<strlen(key)-2; k++){
+            newKey[k] = key[k+1];
+        }
+        
         
         
         token = strtok(NULL, ":");
 
         char *value = strdup(token);
-        /* printf("%s\n", token);   */
+        value = removeLeadingSpaces(value);
+        char *newValue = (char*)malloc(strlen(value)*sizeof(char));
+        for(k=0; k<strlen(value)-3; k++){
+            newValue[k] = value[k+1];
+        }
+        
         token = strtok(NULL, ":");
 
-        value = removeLeadingSpaces(value);
-
-        /*printf("%s\n", key);
-        printf("%s\n",value);*/
+        
+    
 
         Jval myJval = (Jval)malloc(sizeof(Jval));
-        myJval = new_jval_v(strdup(value));
+        myJval = new_jval_v(strdup(newValue));
 
         Jval myJval2 = (Jval)malloc(sizeof(Jval));
-        myJval2 = new_jval_v(strdup(key));
+        myJval2 = new_jval_s(strdup(newKey));
 
         if(strcmp(argv[1], "-e")==0){
             (void) jrb_insert_gen(jrb, myJval2, myJval, compareJval);
@@ -95,21 +107,33 @@ int main(int argc, char** argv)
             fprintf(stderr, "Wrong parameter/n");
             exit(EXIT_FAILURE);
         }
+
+        free(newKey);
+        free(newValue);
     }
-    /*free(key);
-        free(value);
-        free(token);*/
     
-        
-        
-    JRB bn;
-    jrb_traverse(bn, jrb) {
-        printf("%s", jval_s(bn->val));
-        printf("%s", jval_s(bn->key));
+
+    if(strcmp(argv[1], "-e")==0){
+        while(get_line(is) >= 0) {
+            for (i = 0; i < is->NF; i++) {
+                //printf("%s\n",is->fields[i]);
+                fprintf(output,"%s ",jrb_find_str(jrb, is->fields[i])->val);
+            }
+        }
+    }else{
+        while(get_line(is) >= 0) {
+            for (i = 0; i < is->NF; i++) {
+                //printf("%s\n",is->fields[i]);
+                fprintf(output,"%s ",jrb_find_str(jrb, is->fields[i])->val);
+                
+            }
+        }
     }
 
 
     fclose(fp);
+    jettison_inputstruct(is);
+    fclose(output);
 
     return 0;
 }
