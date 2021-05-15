@@ -1,21 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "jval.h"
-#include "jrb.h"
-#include "fields.h"
+
+#include "libfdr/jval.h"
+#include "libfdr/jrb.h"
+#include "libfdr/dllist.h"
+#include "libfdr/fields.h"
+
 #define MAX_SIZE 1000
 
 char *removeLeadingSpaces(char *str);
 
 void removeChar(char *s, char c);
 
-int main()
+int compareJval(Jval j1, Jval j2);
+
+int main(int argc, char** argv)
 {
+
+    if(argc != 4){  /* Checking if program called properly */
+        fprintf(stderr, "Incorrect parameter count\n");
+        exit(EXIT_FAILURE);
+    } 
+
     JRB jrb = make_jrb();
 
     const char *filename = ".kilit";
     FILE *fp = fopen(filename, "rb");
+    /*  FILE * input = fopen(argv[2], "r");  */
+
+    IS is;      /* Fields struct for reading input */
+    is = new_inputstruct(argv[2]);
+
+    FILE * output = fopen(argv[3], "w+");
+
     if (!fp)
         perror(filename), exit(1);
 
@@ -41,8 +59,8 @@ int main()
 
         char *token = strtok(file[j], ":");
 
-        // Keep printing tokens while one of the
-        // delimiters present in str[].
+        /* Keep printing tokens while one of the
+           delimiters present in str[]. */
 
         char *key = strdup(token);
         
@@ -50,7 +68,7 @@ int main()
         token = strtok(NULL, ":");
 
         char *value = strdup(token);
-        //printf("%s\n", token);
+        /* printf("%s\n", token);   */
         token = strtok(NULL, ":");
 
         value = removeLeadingSpaces(value);
@@ -59,20 +77,36 @@ int main()
         printf("%s\n",value);*/
 
         Jval myJval = (Jval)malloc(sizeof(Jval));
-        myJval = new_jval_s(strdup(value));
+        myJval = new_jval_v(strdup(value));
 
-        
-        (void) jrb_insert_str(jrb, strdup(key), myJval);
+        Jval myJval2 = (Jval)malloc(sizeof(Jval));
+        myJval2 = new_jval_v(strdup(key));
 
-        
+        if(strcmp(argv[1], "-e")==0){
+            (void) jrb_insert_gen(jrb, myJval2, myJval, compareJval);
+        }
+
+        else if(strcmp(argv[1], "-d")== 0){
+
+            (void) jrb_insert_gen(jrb, myJval, myJval2, compareJval);
+        }
+
+        else{
+            fprintf(stderr, "Wrong parameter/n");
+            exit(EXIT_FAILURE);
+        }
     }
     /*free(key);
         free(value);
         free(token);*/
+    
+        
+        
     JRB bn;
     jrb_traverse(bn, jrb) {
-    printf("%s", jval_s(bn->val));
-  }
+        printf("%s", jval_s(bn->val));
+        printf("%s", jval_s(bn->key));
+    }
 
 
     fclose(fp);
@@ -86,16 +120,16 @@ char *removeLeadingSpaces(char *str)
     static char str1[1000];
     int count = 0, j, k;
 
-    // Iterate String until last
-    // leading space character
+    /* Iterate String until last
+       leading space character  */
     while (str[count] == ' ')
     {
         count++;
     }
 
-    // Putting string into another
-    // string variable after
-    // removing leading white spaces
+    /* Putting string into another
+       string variable after
+       removing leading white spaces */
     for (j = count, k = 0;
          str[j] != '\0'; j++, k++)
     {
@@ -115,4 +149,9 @@ void removeChar(char *s, char c)
             s[j++] = s[i];
 
     s[j] = '\0';
+}
+
+int compareJval(Jval j1, Jval j2){
+
+    return strcmp(j1.s, j2.s);
 }
