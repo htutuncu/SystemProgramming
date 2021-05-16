@@ -7,13 +7,14 @@
 #include "dllist.h"
 #include "fields.h"
 
-#define MAX_SIZE 1000
+#define MAX_SIZE 10000
 
 char *removeLeadingSpaces(char *str);
 
 void removeChar(char *s, char c);
 
 int compareJval(Jval j1, Jval j2);
+char *removeColons(char *str);
 
 int main(int argc, char** argv)
 {
@@ -27,7 +28,6 @@ int main(int argc, char** argv)
 
     const char *filename = ".kilit";
     FILE *fp = fopen(filename, "rb");
-    //FILE * input = fopen(argv[2], "r"); 
 
     IS is;      /* Fields struct for reading input */
     is = new_inputstruct(argv[2]);
@@ -58,9 +58,13 @@ int main(int argc, char** argv)
     for (j = 1; j < i - 1; j++)
     {
         file[j] = removeLeadingSpaces(file[j]);
-        removeChar(file[j], ',');
+        //removeChar(file[j], ',');
+        //file[j] = removeColons(file[j]);
+        //file[j][strlen(file[j])-2] = '\0';
+        //printf("%s\n",file[j]);
 
         char *token = strtok(file[j], ":");
+        //removeLeadingSpaces(token);
 
         /* Keep printing tokens while one of the
            delimiters present in str[]. */
@@ -85,8 +89,14 @@ int main(int argc, char** argv)
         
         token = strtok(NULL, ":");
 
-        
+        if(newValue[strlen(newValue)-1] == '\"')
+            newValue[strlen(newValue)-1] = '\0';
+        else{
+            newValue[strlen(newValue)] = '\0';
+        }
+
     
+        
 
         Jval myJval = (Jval)malloc(sizeof(Jval));
         myJval = new_jval_v(strdup(newValue));
@@ -107,25 +117,34 @@ int main(int argc, char** argv)
             fprintf(stderr, "Wrong parameter/n");
             exit(EXIT_FAILURE);
         }
-
+        
+        
         free(newKey);
         free(newValue);
     }
     
+    
+
+
+
 
     if(strcmp(argv[1], "-e")==0){
         while(get_line(is) >= 0) {
             for (i = 0; i < is->NF; i++) {
-                //printf("%s\n",is->fields[i]);
-                fprintf(output,"%s ",jrb_find_str(jrb, is->fields[i])->val);
+                if(jrb_find_str(jrb, is->fields[i]) != NULL)
+                    fprintf(output,"%s ",jrb_find_str(jrb, is->fields[i])->val);
+                else
+                    fprintf(output,"%s ",is->fields[i]);
+                
             }
         }
     }else{
         while(get_line(is) >= 0) {
             for (i = 0; i < is->NF; i++) {
-                //printf("%s\n",is->fields[i]);
-                fprintf(output,"%s ",jrb_find_str(jrb, is->fields[i])->val);
-                
+                if(jrb_find_str(jrb, is->fields[i]) != NULL)
+                    fprintf(output,"%s ",jrb_find_str(jrb, is->fields[i])->val);
+                else
+                    fprintf(output,"%s ",is->fields[i]);
             }
         }
     }
@@ -162,6 +181,18 @@ char *removeLeadingSpaces(char *str)
     str1[k] = '\0';
 
     return str1;
+}
+
+char *removeColons(char *str)
+{
+    int count = 0, j, k;
+
+    if( str[strlen(str)-2] == ',')
+        str[strlen(str)-2] = '\0';
+
+    //printf("%s\n",str);
+
+    return str;
 }
 
 void removeChar(char *s, char c)
