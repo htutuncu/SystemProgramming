@@ -9,8 +9,6 @@
 
 #define MAX_SIZE 1000
 
-char *removeLeadingSpaces(char *str);
-
 int compareJval(Jval j1, Jval j2);
 
 int main(int argc, char **argv)
@@ -25,7 +23,6 @@ int main(int argc, char **argv)
     JRB jrb = make_jrb();
 
     const char *filename = ".kilit";
-    //FILE *fp = fopen(filename, "rb");
 
     IS is; /* Fields struct for reading input */
     IS kilit;
@@ -91,7 +88,7 @@ int main(int argc, char **argv)
 
                 else
                 {
-                    fprintf(stderr, "Wrong parameter/n");
+                    fprintf(stderr, "Wrong parameter\n");
                     exit(EXIT_FAILURE);
                 }
 
@@ -137,33 +134,9 @@ int main(int argc, char **argv)
     return 0;
 }
 
-char *removeLeadingSpaces(char *str)
-{
-    static char str1[1000];
-    int count = 0, j, k;
 
-    /* Iterate String until last
-       leading space character  */
-    while (str[count] == ' ')
-    {
-        count++;
-    }
-
-    /* Putting string into another
-       string variable after
-       removing leading white spaces */
-    for (j = count, k = 0;
-         str[j] != '\0'; j++, k++)
-    {
-        str1[k] = str[j];
-    }
-    str1[k] = '\0';
-
-    return str1;
-}
 
 int compareJval(Jval j1, Jval j2)
 {
-
     return strcmp(j1.s, j2.s);
 }
