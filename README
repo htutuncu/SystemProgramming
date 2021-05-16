@@ -1,0 +1,11 @@
+Projede öncelikle JSON kilit dosyası okundu. Sonrasında JRB tree dolduruldu. 
+Doğruluğu test edildikten sonra -e ve -d parametrelerine göre giris cikis dosyaları
+olusturuldu. Kilit dosyasını okurken başka fields kullanmamıştık fakat sonradan bunu
+da düzelttik ve fields ile okuduk. Memory leakler giderildi. Son olarak da makefile
+ödevde istenen şekle getirildi.
+
+
+Hikmet Tutuncu
+Edis Halil
+Burak Uslu
+Emine Nur Gülsu
